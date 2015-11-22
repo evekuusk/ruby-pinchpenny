@@ -1,8 +1,9 @@
 require 'colorize'
 puts "\n\n\n"
-puts "############## -pinchpenny- ##############".yellow
+puts "############## {{ -pinchpenny- }} ##############".yellow
 puts "Welcome!  This tool will walk you through the steps of outlining your income, expenses, savings goals, and will assist in creation of a budget."
 puts "DISCLAIMER: This program is not intended as financial advice."
+
 
 puts "\n####### Step 1: Income & Expenses #######"
 puts "----- INCOME -----"
@@ -125,13 +126,13 @@ while payments == "y" || payments == "yes"
 
   puts "MONTHS TO FULL REPAYMENT: #{timeline}"
 
-  if remains < lowest_amount
+  if remains < lowest_amount || lowest_amount == 0
     lowest_amount = remains
     lowest_amount_name = name
   end
 
 
-  print "\nAdd another recurring payment? (y/n) "
+  print "\nAdd another recurring payment? (y/n): "
   payments = gets.chomp.downcase
 end
 
@@ -159,4 +160,11 @@ puts "\nMONTHLY NET INCOME: $#{'%.2f' % monthly_net_income}".green
 puts "REGULAR EXPENSES: $#{'%.2f' % total_regular_expenses}".red
 puts "MONTHLY DEBT PAYMENTS: $#{'%.2f' % total_monthly_contributions}".red
 puts "TOTAL MONTHLY EXPENSES: #{'%.2f' % total_expenses}".red
-puts "\nDIFFERENCE: $#{'%.2f' % monthly_difference}".blue
+puts "DIFFERENCE: $#{'%.2f' % monthly_difference}".blue
+
+puts "\n----- GOALS -----"
+if monthly_difference < 0
+  puts "WARNING:  Your expenses are higher than your income!".red
+end
+
+puts "What would you like to focus on?"
