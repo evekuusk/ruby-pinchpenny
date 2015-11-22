@@ -27,7 +27,7 @@ if known_tax == "n" || known_tax == "no"
   net_wage = (payday_amount / payday_hours).round(2)
 elsif known_tax == "y" || known_tax == "yes"
   print "Tax deducations (%): "
-  income_tax = gets.chomp.to_i
+  income_tax = gets.chomp.to_f.round(2)
   tax_remainder = (100 - income_tax) * 0.01
   net_wage = (income_wage * tax_remainder).round(2)
 else
@@ -69,10 +69,14 @@ print "Household Supplies & Toiletries: $"
 expenses_household = gets.chomp.to_f.round(2)
 print "Entertainment (TV, Netflix, misc. subscriptions): $"
 expenses_entertainment = gets.chomp.to_f.round(2)
+print "Education or Self-Improvement: $"
+expenses_education = gets.chomp.to_f.round(2)
+print "Fitness & Health: $"
+expenses_health = gets.chomp.to_f.round(2)
 print "Other (do not include debt payments): $"
 expenses_other = gets.chomp.to_f.round(2)
 
-total_regular_expenses = expenses_rent + expenses_insurance + expenses_utilities + expenses_transit + expenses_transportation + expenses_phone + expenses_internet + expenses_food + expenses_household + expenses_entertainment + expenses_other
+total_regular_expenses = expenses_rent + expenses_insurance + expenses_utilities + expenses_transit + expenses_transportation + expenses_phone + expenses_internet + expenses_food + expenses_household + expenses_entertainment + expenses_education + expenses_health + expenses_other
 
 
 puts "\nREGULAR EXPENSES: $#{'%.2f' % total_regular_expenses}".red
@@ -151,16 +155,20 @@ puts "TOTAL MONTHS TO REPAYMENT FOR ALL DEBTS AT THIS RATE: #{total_months_to_re
 
 
 puts "\n\n####### Step 2: Overview #######"
-puts "----- INCOME vs EXPENSES -----"
+puts "----- INCOME vs EXPENSES vs Savings -----"
 
 total_expenses = (total_regular_expenses + total_monthly_contributions).to_f.round(2)
 monthly_difference = (monthly_net_income - total_expenses).to_f.round(2)
+
+print "Total current cash savings: $"
+savings = gets.chomp.to_f.round(2)
 
 puts "\nMONTHLY NET INCOME: $#{'%.2f' % monthly_net_income}".green
 puts "REGULAR EXPENSES: $#{'%.2f' % total_regular_expenses}".red
 puts "MONTHLY DEBT PAYMENTS: $#{'%.2f' % total_monthly_contributions}".red
 puts "TOTAL MONTHLY EXPENSES: #{'%.2f' % total_expenses}".red
 puts "DIFFERENCE: $#{'%.2f' % monthly_difference}".blue
+puts "CURRENT SAVINGS: $#{'%.2f' % savings}".yellow
 
 puts "\n----- GOALS -----"
 if monthly_difference < 0
