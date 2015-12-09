@@ -3,13 +3,12 @@ puts "\n\n\n"
 puts "############## {{ -pinchpenny- }} ##############".yellow
 puts "Welcome!  This tool will walk you through the steps of outlining your income, expenses, savings goals, and will assist in creation of a budget."
 puts "DISCLAIMER: This program is not intended as financial advice."
-
-
 puts "\n####### Step 1: Income & Expenses #######"
 puts "----- INCOME -----"
 
 print "\nPlease input your before tax hourly wage: $"
 income_wage = gets.chomp.to_f.round(2)
+
 
 known_tax = ""
 until known_tax == "y" || known_tax == "yes" || known_tax == "n" || known_tax == "no"
@@ -37,6 +36,7 @@ end
 print "Number of work hours per week (if you do not work consistent hours, please input a reasonable average -- input partial hours as a decimal value): "
 income_hours = gets.chomp.to_f.round(2)
 
+
 annual_hours = income_hours * 52
 annual_net_income = (net_wage * annual_hours).round(2)
 monthly_net_income = (annual_net_income / 12).round(2)
@@ -59,7 +59,7 @@ print "Public Transit: $"
 expenses_transit = gets.chomp.to_f.round(2)
 print "Personal Transportation (Gas/Car Insurance -- do not include car payments): $"
 expenses_transportation = gets.chomp.to_f.round(2)
-print "Phone Bill: $"
+print "Phone: $"
 expenses_phone = gets.chomp.to_f.round(2)
 print "Internet: $"
 expenses_internet = gets.chomp.to_f.round(2)
@@ -107,9 +107,7 @@ while payments == "y" || payments == "yes"
   name = gets.chomp
   print "Monthly payment amount: $"
   monthly_contribution = gets.chomp.to_f.round(2)
-
   total_monthly_contributions = total_monthly_contributions + monthly_contribution
-
   expenses_payments = expenses_payments + monthly_contribution
   print "Interest (%): "
   interest = gets.chomp.to_f.round(2)
@@ -122,9 +120,7 @@ while payments == "y" || payments == "yes"
   avg_interest = (avg_interest + interest) / num_payments
   print "Total amount remaining: $"
   remains = gets.chomp.to_f.round(2)
-
   total_remains = total_remains + remains
-
   timeline = (remains / monthly_contribution).to_i
   total_months_to_repayment = total_months_to_repayment + timeline
 
@@ -134,7 +130,6 @@ while payments == "y" || payments == "yes"
     lowest_amount = remains
     lowest_amount_name = name
   end
-
 
   print "\nAdd another recurring payment? (y/n): "
   payments = gets.chomp.downcase
@@ -153,26 +148,103 @@ puts "AVERAGE INTEREST ON DEBTS: #{'%.2f' % avg_interest}%".red
 puts "TOTAL MONTHLY PAYMENTS: $#{'%.2f' % total_monthly_contributions}".red
 puts "TOTAL MONTHS TO REPAYMENT FOR ALL DEBTS AT THIS RATE: #{total_months_to_repayment}".red
 
-
 puts "\n\n####### Step 2: Overview #######"
 puts "----- INCOME vs EXPENSES vs Savings -----"
-
 total_expenses = (total_regular_expenses + total_monthly_contributions).to_f.round(2)
 monthly_difference = (monthly_net_income - total_expenses).to_f.round(2)
 
 print "Total current cash savings: $"
-savings = gets.chomp.to_f.round(2)
+current_savings = gets.chomp.to_f.round(2)
 
+regular_savings = ""
+until regular_savings == "y" || regular_savings == "yes" || regular_savings == "n" || regular_savings == "no"
+  print "Do you have any regular monthly savings contributions? (y/n): "
+  regular_savings = gets.chomp.downcase
+end
+
+if regular_savings == "y" || regular_savings == "yes"
+  print "Total Regular Savings Contributions: $"
+  monthly_savings = gets.chomp.to_f.round(2)
+end
+
+total_remainder = monthly_difference - monthly_savings
 puts "\nMONTHLY NET INCOME: $#{'%.2f' % monthly_net_income}".green
 puts "REGULAR EXPENSES: $#{'%.2f' % total_regular_expenses}".red
 puts "MONTHLY DEBT PAYMENTS: $#{'%.2f' % total_monthly_contributions}".red
 puts "TOTAL MONTHLY EXPENSES: #{'%.2f' % total_expenses}".red
-puts "DIFFERENCE: $#{'%.2f' % monthly_difference}".blue
-puts "CURRENT SAVINGS: $#{'%.2f' % savings}".yellow
+puts "MONTHLY DIFFERENCE: $#{'%.2f' % monthly_difference}".blue
+puts "REGULAR MONTHLY SAVINGS: $#{'%.2f' % monthly_savings}".yellow
+puts "CURRENT SAVINGS: $#{'%.2f' % current_savings}".yellow
+puts "TOTAL MONTHLY INCOME REMAINDER: $#{'%.2f' % total_remainder}".blue
 
-puts "\n----- GOALS -----"
-if monthly_difference < 0
+puts "\n----- SAVINGS GOALS -----"
+if total_remainder < 0
   puts "WARNING:  Your expenses are higher than your income!".red
 end
 
-puts "What would you like to focus on?"
+puts "Select an option to continue..."
+max_savings = (total_remainder + monthly_savings).to_f.round(2)
+savings_goal = 0
+remaining_savings_goal = (savings_goal - current_savings).to_f.round(2)
+continue_option = ""
+until continue_option == "A" || continue_option == "B" || continue_option == "C" || continue_option == "D"
+  puts "A. Create a short term savings plan (3 months - 3 years)"
+  puts "B. Create a long term savings plan (3 years +)"
+  puts "C. Create a savings plan for a specific amount"
+  print "(A/B/C): "
+  continue_option = gets.chomp.upcase
+end
+
+if continue_option == "A"
+  puts "\n----- A. SHORT TERM SAVINGS PLAN -----"
+  st_savings_months = 0
+  st_savings_years = 0
+  include_current = ""
+  total_savings = 0
+  st_wmy = ""
+  until st_wmy == "M" || st_wmy == "Y"
+    puts "Calculate in months or years?"
+    print "(M/Y): "
+    st_wmy = gets.chomp.upcase
+  end
+  if st_wmy == "M"
+    until st_savings_months >= 0.5 && st_savings_months <= 36
+      print "Number of Months (minimum 0.5, maximum 36): "
+      st_savings_months = gets.chomp.to_i
+    end
+    puts "You plan to maximize short term savings over the course of #{st_savings_months} months.".green
+    total_savings = (max_savings * st_savings_months).to_f.round(2)
+    puts "Based on your current budget, you will likely save approximately $#{'%.2f' % total_savings}.".green
+  elsif st_wmy == "Y"
+    until st_savings_years <= 3 && st_savings_years != 0
+      print "Number of Years (maximum 3.0): "
+      st_savings_years = gets.chomp.to_f.round(2)
+    end
+    puts "You plan to maximize short term savings over the course of #{st_savings_years} years.".green
+    total_savings = ((max_savings * 12 )* st_savings_years).to_f.round(2)
+    puts "Based on your current budget, you will likely save approximately $#{'%.2f' % total_savings}.".green
+  end
+
+elsif continue_option == "B"
+puts "\n----- B. LONG TERM SAVINGS PLAN -----"
+lt_savings_years = 0
+  until lt_savings_years >= 3
+    print "Number of Years (minimum 3.0): "
+    lt_savings_years = gets.chomp.to_f.round(2)
+  end
+  puts "You plan to maximize long term savings over the course of #{lt_savings_years} years.".green
+  total_savings = ((max_savings * 12 )* lt_savings_years).to_f.round(2)
+  puts "Based on your current budget, you will likely save approximately $#{'%.2f' % total_savings}.".green
+elsif continue_option == "C"
+  puts "\n----- C. SAVINGS GOAL AMOUNT -----"
+  savings_months = 0
+  savings_years = 0
+  timeline_over_year = FALSE
+  until savings_goal > 0
+    print "Savings Goal Amount: $"
+    savings_goal = gets.to_f.round(2)
+  end
+  puts "You plan to save a total of #{'%.2f' % savings_goal}.".green
+
+  puts "Based on your current budget, you will likely save approximately $#{'%.2f' % total_savings}.".green
+end
