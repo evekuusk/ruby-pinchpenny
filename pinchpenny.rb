@@ -1,4 +1,11 @@
 require 'colorize'
+
+def separate_comma(number)
+  whole, decimal = number.to_s.split(".")
+  whole_with_commas = whole.chars.to_a.reverse.each_slice(3).map(&:join).join(",").reverse
+  [whole_with_commas, decimal].compact.join(".")
+end
+
 puts "\n\n\n"
 puts "############## {{ -pinchpenny- }} ##############".yellow
 puts "Welcome!  This tool will walk you through the steps of outlining your income, expenses, savings goals, and will assist in creation of a budget."
@@ -31,6 +38,9 @@ annual_hours = income_hours * 52
 
 if income_type == "a"
   income_wage = (income_salary / 52) / income_hours
+  income_wage = (income_salary / annual_hours).round(2)
+elsif income_type == "b"
+  income_salary = (income_wage * annual_hours).round(2)
 end
 
 known_tax = ""
@@ -55,193 +65,112 @@ elsif known_tax == "y" || known_tax == "yes"
 else
 end
 
+annual_gross_income = (income_wage * annual_hours).round(2)
 annual_net_income = (net_wage * annual_hours).round(2)
 monthly_net_income = (annual_net_income / 12).round(2)
 weekly_net_income = (net_wage * income_hours).round(2)
 daily_net_income = (weekly_net_income / 5).round(2)
 
-puts "\nHOURLY WAGE: $#{'%.2f' % income_wage}".green
-puts "NET HOURLY WAGE: $#{'%.2f' % net_wage}".green
-puts "DAILY NET INCOME: $#{'%.2f' % daily_net_income}".green
-puts "WEEKLY NET INCOME: $#{'%.2f' % weekly_net_income}".green
-puts "MONTHLY NET INCOME: $#{'%.2f' % monthly_net_income}".green
-puts "ANNUAL NET INCOME: $#{'%.2f' % annual_net_income}".green
+puts "\nGROSS HOURLY WAGE: $#{separate_comma('%.2f' % income_wage)}".yellow
+puts "GROSS ANNUAL SALARY: $#{separate_comma('%.2f' % income_salary)}".yellow
+puts "HOURLY NET WAGE: $#{separate_comma('%.2f' % net_wage)}".green
+puts "DAILY NET INCOME: $#{separate_comma('%.2f' % daily_net_income)}".green
+puts "WEEKLY NET INCOME: $#{separate_comma('%.2f' % weekly_net_income)}".green
+puts "MONTHLY NET INCOME: $#{separate_comma('%.2f' % monthly_net_income)}".green
+puts "ANNUAL NET INCOME: $#{separate_comma('%.2f' % annual_net_income)}".green
 
 puts "\n\n----- REGULAR EXPENSES -----"
-puts "Please input your monthly expenses by category...Press ENTER to skip if a category does not apply to your budget."
-puts "Please do not include payments toward a mortgage, car, or other loans, as they will be handled separately.".blue
 
-print "Rent (do not include mortgage payments): $"
-expenses_rent = gets.chomp.to_f.round(2)
-total_regular_expenses = expenses_rent
-puts "= $#{'%.2f' % total_regular_expenses}".yellow
+known_expenses = ""
+until known_expenses == "y" || known_expenses == "yes" || known_expenses == "n" || known_expenses == "no"
+  puts "You may input your regular expenses as a single amount OR you may input every expense separately."
+  print "Would you like to input the full amount of your regular monthly expenses? (y/n): "
+  known_expenses = gets.chomp.downcase
+end
 
-print "Insurance: $"
-expenses_insurance = gets.chomp.to_f.round(2)
-total_regular_expenses += expenses_insurance
-puts "= $#{'%.2f' % total_regular_expenses}".yellow
+total_regular_expenses = 0
+if known_expenses == "y" || known_expenses == "yes"
+  puts "\nPlease do not include payments toward a mortgage, car, or other loans, as they will be handled separately.".blue
+  print "Full amount of regular monthly expenses excluding debt repayments: $"
+  until total_regular_expenses > 0
+    total_regular_expenses = gets.chomp.to_f.round(2)
+  end
+elsif known_expenses == "n" || known_expenses == "no"
+  puts "Please input your monthly expenses by category...Press ENTER to skip if a category does not apply to your budget."
+  puts "Please do not include payments toward a mortgage, car, or other loans, as they will be handled separately.".blue
 
-print "Utilities (Heat/Electricity/Water): $"
-expenses_utilities = gets.chomp.to_f.round(2)
-total_regular_expenses += expenses_utilities
-puts "= $#{'%.2f' % total_regular_expenses}".yellow
+  print "Rent (do not include mortgage payments): $"
+  expenses_rent = gets.chomp.to_f.round(2)
+  total_regular_expenses = expenses_rent
+  puts "= $#{separate_comma('%.2f' % total_regular_expenses)}".yellow
 
-print "Public Transit: $"
-expenses_transit = gets.chomp.to_f.round(2)
-total_regular_expenses += expenses_transit
-puts "= $#{'%.2f' % total_regular_expenses}".yellow
+  print "Insurance: $"
+  expenses_insurance = gets.chomp.to_f.round(2)
+  total_regular_expenses += expenses_insurance
+  puts "= $#{separate_comma('%.2f' % total_regular_expenses)}".yellow
 
-print "Personal Transportation (Gas/Car Insurance -- do not include car payments): $"
-expenses_transportation = gets.chomp.to_f.round(2)
-total_regular_expenses += expenses_transportation
-puts "= $#{'%.2f' % total_regular_expenses}".yellow
+  print "Utilities (Heat/Electricity/Water): $"
+  expenses_utilities = gets.chomp.to_f.round(2)
+  total_regular_expenses += expenses_utilities
+  puts "= $#{separate_comma('%.2f' % total_regular_expenses)}".yellow
 
-print "Cell Phone: $"
-expenses_phone = gets.chomp.to_f.round(2)
-total_regular_expenses += expenses_phone
-puts "= $#{'%.2f' % total_regular_expenses}".yellow
+  print "Public Transit: $"
+  expenses_transit = gets.chomp.to_f.round(2)
+  total_regular_expenses += expenses_transit
+  puts "= $#{separate_comma('%.2f' % total_regular_expenses)}".yellow
 
-print "Internet, Cable, & Home Phone: $"
-expenses_internet = gets.chomp.to_f.round(2)
-total_regular_expenses += expenses_internet
-puts "= $#{'%.2f' % total_regular_expenses}".yellow
+  print "Personal Transportation (Gas/Car Insurance -- do not include car payments): $"
+  expenses_transportation = gets.chomp.to_f.round(2)
+  total_regular_expenses += expenses_transportation
+  puts "= $#{separate_comma('%.2f' % total_regular_expenses)}".yellow
 
-print "Food: $"
-expenses_food = gets.chomp.to_f.round(2)
-total_regular_expenses += expenses_food
-puts "= $#{'%.2f' % total_regular_expenses}".yellow
+  print "Cell Phone: $"
+  expenses_phone = gets.chomp.to_f.round(2)
+  total_regular_expenses += expenses_phone
+  puts "= $#{separate_comma('%.2f' % total_regular_expenses)}".yellow
 
-print "Household Supplies & Toiletries: $"
-expenses_household = gets.chomp.to_f.round(2)
-total_regular_expenses += expenses_household
-puts "= $#{'%.2f' % total_regular_expenses}".yellow
+  print "Internet, Cable, & Home Phone: $"
+  expenses_internet = gets.chomp.to_f.round(2)
+  total_regular_expenses += expenses_internet
+  puts "= $#{separate_comma('%.2f' % total_regular_expenses)}".yellow
 
-print "Entertainment (TV, Netflix, misc. subscriptions): $"
-expenses_entertainment = gets.chomp.to_f.round(2)
-total_regular_expenses += expenses_entertainment
-puts "= $#{'%.2f' % total_regular_expenses}".yellow
+  print "Food: $"
+  expenses_food = gets.chomp.to_f.round(2)
+  total_regular_expenses += expenses_food
+  puts "= $#{separate_comma('%.2f' % total_regular_expenses)}".yellow
 
-print "Education or Self-Improvement: $"
-expenses_education = gets.chomp.to_f.round(2)
-total_regular_expenses += expenses_education
-puts "= $#{'%.2f' % total_regular_expenses}".yellow
+  print "Household Supplies & Toiletries: $"
+  expenses_household = gets.chomp.to_f.round(2)
+  total_regular_expenses += expenses_household
+  puts "= $#{separate_comma('%.2f' % total_regular_expenses)}".yellow
 
-print "Fitness & Health: $"
-expenses_health = gets.chomp.to_f.round(2)
-total_regular_expenses += expenses_health
-puts "= $#{'%.2f' % total_regular_expenses}".yellow
+  print "Entertainment (TV, Netflix, misc. subscriptions): $"
+  expenses_entertainment = gets.chomp.to_f.round(2)
+  total_regular_expenses += expenses_entertainment
+  puts "= $#{separate_comma('%.2f' % total_regular_expenses)}".yellow
 
-print "Other (do not include debt payments): $"
-expenses_other = gets.chomp.to_f.round(2)
-total_regular_expenses += expenses_other
-puts "= $#{'%.2f' % total_regular_expenses}".yellow
+  print "Education, Hobbies, or Self-Improvement: $"
+  expenses_education = gets.chomp.to_f.round(2)
+  total_regular_expenses += expenses_education
+  puts "= $#{separate_comma('%.2f' % total_regular_expenses)}".yellow
 
-puts "\nREGULAR EXPENSES: $#{'%.2f' % total_regular_expenses}".red
-edit_expenses = ""
+  print "Fitness & Health: $"
+  expenses_health = gets.chomp.to_f.round(2)
+  total_regular_expenses += expenses_health
+  puts "= $#{separate_comma('%.2f' % total_regular_expenses)}".yellow
 
-until edit_expenses == "y" || edit_expenses == "yes" || edit_expenses == "n" || edit_expenses == "no"
-  print "Edit expenses? (y/n): "
-  edit_expenses = gets.chomp.downcase
+  print "Other (do not include debt payments): $"
+  expenses_other = gets.chomp.to_f.round(2)
+  total_regular_expenses += expenses_other
+  puts "= $#{separate_comma('%.2f' % total_regular_expenses)}".yellow
 
-  while edit_expenses == "y" || edit_expenses == "yes"
-    puts "\nCurrent Expenses"
-    puts "==========================="
-    puts "Rent......$#{'%.2f' % expenses_rent}"
-    puts "Insurance......$#{'%.2f' % expenses_insurance}"
-    puts "Utilities......$#{'%.2f' % expenses_utilities}"
-    puts "Public Transit......$#{'%.2f' % expenses_transit}"
-    puts "Personal Transportation......$#{'%.2f' % expenses_transportation}"
-    puts "Cell Phone......$#{'%.2f' % expenses_phone}"
-    puts "Internet & Cable & Home Phone......$#{'%.2f' % expenses_internet}"
-    puts "Food......$#{'%.2f' % expenses_food}"
-    puts "Household Supplies & Toiletries......$#{'%.2f' % expenses_household}"
-    puts "Entertainment......$#{'%.2f' % expenses_entertainment}"
-    puts "Education & Self-Improvement......$#{'%.2f' % expenses_education}"
-    puts "Fitness & Health......$#{'%.2f' % expenses_health}"
-    puts "Other......$#{'%.2f' % expenses_other}"
-    puts "==========================="
+  puts "\nREGULAR EXPENSES: $#{separate_comma('%.2f' % total_regular_expenses)}".red
+  edit_expenses = ""
 
-    edit_which = ""
-    until edit_which == "rent" || edit_which == "insurance" || edit_which == "utilities" || edit_which == "public transit" || edit_which == "transportation" || edit_which == "cell phone" || edit_which == "internet" || edit_which == "internet, cable, phone" || edit_which == "food" || edit_which == "household" || edit_which == "entertainment" || edit_which == "education" || edit_which == "health" || edit_which == "other"
-      print "\nWhich expense would you like to edit? (rent/insurance/utilities/public transit/transportation/cell phone/internet/cable/home phone/food/household/entertainment/education/health/other): "
-      edit_which = gets.chomp.downcase
-
-      case edit_which
-      when "rent"
-        print "Editing rent:".blue
-        print " $"
-        expenses_rent = gets.chomp.to_f.round(2)
-        puts "Rent......$#{'%.2f' % expenses_rent}".yellow
-      when "insurance"
-        print "Editing insurance:".blue
-        print " $"
-        expenses_insurance = gets.chomp.to_f.round(2)
-        puts "Insurance......$#{'%.2f' % expenses_insurance}".yellow
-      when "utilities"
-        print "Editing utilities:".blue
-        print " $"
-        expenses_utilities = gets.chomp.to_f.round(2)
-        puts "Utilities......$#{'%.2f' % expenses_utilities}".yellow
-      when "public transit", "transit"
-        print "Editing public transit:".blue
-        print " $"
-        expenses_transit = gets.chomp.to_f.round(2)
-        puts "Public Transit......$#{'%.2f' % expenses_transit}".yellow
-      when "transportation", "personal transportation"
-        print "Editing transportation:".blue
-        print " $"
-        expenses_transportation = gets.chomp.to_f.round(2)
-        puts "Personal Transportation......$#{'%.2f' % expenses_transportation}".yellow
-      when "cell phone", "phone"
-        print "Editing cell phone:".blue
-        print " $"
-        expenses_phone = gets.chomp.to_f.round(2)
-        puts "Cell Phone......$#{'%.2f' % expenses_phone}".yellow
-      when "internet", "cable", "home phone", "internet, cable, home phone", "internet, cable, & home phone"
-        print "Editing internet, cable, & home phone:".blue
-        print " $"
-        expenses_internet = gets.chomp.to_f.round(2)
-        puts "Internet, Cable, & Home Phone......$#{'%.2f' % expenses_internet}".yellow
-      when "food"
-        print "Editing food:".blue
-        print " $"
-        expenses_food = gets.chomp.to_f.round(2)
-        puts "Food......$#{'%.2f' % expenses_food}".yellow
-      when "household", "toiletries", "household supplies", "household supplies & toiletries"
-        print "Editing household supplies & toiletries:".blue
-        print " $"
-        expenses_household = gets.chomp.to_f.round(2)
-        puts "Household Supplies & Toiletries......$#{'%.2f' % expenses_household}".yellow
-      when "entertainment"
-        print "Editing entertainment:".blue
-        print " $"
-        expenses_entertainment = gets.chomp.to_f.round(2)
-        puts "Entertainment......$#{'%.2f' % expenses_entertainment}".yellow
-      when "education", "self improvement", "self-improvement", "education & self-improvement", "education & self improvement"
-        print "Editing education & self-improvement:".blue
-        print " $"
-        expenses_education = gets.chomp.to_f.round(2)
-        puts "Education & Self-Improvement......$#{'%.2f' % expenses_education}".yellow
-      when "health", "fitness", "fitness & health"
-        print "Editing health:".blue
-        print " $"
-        expenses_health = gets.chomp.to_f.round(2)
-        puts "Health & Fitness......$#{'%.2f' % expenses_health}".yellow
-      when  "other"
-        print "Editing other:".blue
-        print " $"
-        expenses_other = gets.chomp.to_f.round(2)
-        puts "Other......$#{'%.2f' % expenses_other}".yellow
-      else
-        "Something went terribly wrong, unable to edit expenses at this time."
-      end
-    end
-
-    total_regular_expenses = (expenses_rent + expenses_insurance + expenses_utilities + expenses_transit + expenses_transportation + expenses_phone + expenses_internet + expenses_food + expenses_household + expenses_entertainment + expenses_education + expenses_health + expenses_other).round(2)
-    print "Edit another? (y/n): "
+  until edit_expenses == "y" || edit_expenses == "yes" || edit_expenses == "n" || edit_expenses == "no"
+    print "Edit expenses? (y/n): "
     edit_expenses = gets.chomp.downcase
-
-    if edit_expenses == "n"
+    while edit_expenses == "y" || edit_expenses == "yes"
       puts "\nCurrent Expenses"
       puts "==========================="
       puts "Rent......$#{'%.2f' % expenses_rent}"
@@ -254,11 +183,132 @@ until edit_expenses == "y" || edit_expenses == "yes" || edit_expenses == "n" || 
       puts "Food......$#{'%.2f' % expenses_food}"
       puts "Household Supplies & Toiletries......$#{'%.2f' % expenses_household}"
       puts "Entertainment......$#{'%.2f' % expenses_entertainment}"
-      puts "Education & Self-Improvement......$#{'%.2f' % expenses_education}"
+      puts "Education & Hobbies & Self-Improvement......$#{'%.2f' % expenses_education}"
       puts "Fitness & Health......$#{'%.2f' % expenses_health}"
       puts "Other......$#{'%.2f' % expenses_other}"
-      puts "TOTAL......$#{'%.2f' % total_regular_expenses}".red
       puts "==========================="
+      edit_which = ""
+      until edit_which == "rent" || edit_which == "insurance" || edit_which == "utilities" || edit_which == "public transit" || edit_which == "transportation" || edit_which == "cell phone" || edit_which == "internet" || edit_which == "internet, cable, phone" || edit_which == "food" || edit_which == "household" || edit_which == "entertainment" || edit_which == "education" || edit_which == "hobbies" || edit_which == "health" || edit_which == "other"
+        print "\nWhich expense would you like to edit? (rent/insurance/utilities/public transit/transportation/cell phone/internet/cable/home phone/food/household/entertainment/education/hobbies/health/other): "
+        edit_which = gets.chomp.downcase
+        case edit_which
+        when "rent"
+          print "Editing rent:".blue
+          print " $"
+          expenses_rent = gets.chomp.to_f.round(2)
+          puts "Rent......$#{'%.2f' % expenses_rent}".yellow
+          print "Edit another? (y/n): "
+          edit_expenses = gets.chomp.downcase
+        when "insurance"
+          print "Editing insurance:".blue
+          print " $"
+          expenses_insurance = gets.chomp.to_f.round(2)
+          puts "Insurance......$#{'%.2f' % expenses_insurance}".yellow
+          print "Edit another? (y/n): "
+          edit_expenses = gets.chomp.downcase
+        when "utilities"
+          print "Editing utilities:".blue
+          print " $"
+          expenses_utilities = gets.chomp.to_f.round(2)
+          puts "Utilities......$#{'%.2f' % expenses_utilities}".yellow
+          print "Edit another? (y/n): "
+          edit_expenses = gets.chomp.downcase
+        when "public transit", "transit"
+          print "Editing public transit:".blue
+          print " $"
+          expenses_transit = gets.chomp.to_f.round(2)
+          puts "Public Transit......$#{'%.2f' % expenses_transit}".yellow
+          print "Edit another? (y/n): "
+          edit_expenses = gets.chomp.downcase
+        when "transportation", "personal transportation"
+          print "Editing transportation:".blue
+          print " $"
+          expenses_transportation = gets.chomp.to_f.round(2)
+          puts "Personal Transportation......$#{'%.2f' % expenses_transportation}".yellow
+          print "Edit another? (y/n): "
+          edit_expenses = gets.chomp.downcase
+        when "cell phone", "phone"
+          print "Editing cell phone:".blue
+          print " $"
+          expenses_phone = gets.chomp.to_f.round(2)
+          puts "Cell Phone......$#{'%.2f' % expenses_phone}".yellow
+          print "Edit another? (y/n): "
+          edit_expenses = gets.chomp.downcase
+        when "internet", "cable", "home phone", "internet, cable, home phone", "internet, cable, & home phone"
+          print "Editing internet, cable, & home phone:".blue
+          print " $"
+          expenses_internet = gets.chomp.to_f.round(2)
+          puts "Internet, Cable, & Home Phone......$#{'%.2f' % expenses_internet}".yellow
+          print "Edit another? (y/n): "
+          edit_expenses = gets.chomp.downcase
+        when "food"
+          print "Editing food:".blue
+          print " $"
+          expenses_food = gets.chomp.to_f.round(2)
+          puts "Food......$#{'%.2f' % expenses_food}".yellow
+          print "Edit another? (y/n): "
+          edit_expenses = gets.chomp.downcase
+        when "household", "toiletries", "household supplies", "household supplies & toiletries"
+          print "Editing household supplies & toiletries:".blue
+          print " $"
+          expenses_household = gets.chomp.to_f.round(2)
+          puts "Household Supplies & Toiletries......$#{'%.2f' % expenses_household}".yellow
+          print "Edit another? (y/n): "
+          edit_expenses = gets.chomp.downcase
+        when "entertainment"
+          print "Editing entertainment:".blue
+          print " $"
+          expenses_entertainment = gets.chomp.to_f.round(2)
+          puts "Entertainment......$#{'%.2f' % expenses_entertainment}".yellow
+          print "Edit another? (y/n): "
+          edit_expenses = gets.chomp.downcase
+        when "education", "self improvement", "self-improvement", "education & self-improvement", "education & self improvement", "hobbies"
+          print "Editing education & hobbies & self-improvement:".blue
+          print " $"
+          expenses_education = gets.chomp.to_f.round(2)
+          puts "Education & Self-Improvement......$#{'%.2f' % expenses_education}".yellow
+          print "Edit another? (y/n): "
+          edit_expenses = gets.chomp.downcase
+        when "health", "fitness", "fitness & health"
+          print "Editing health:".blue
+          print " $"
+          expenses_health = gets.chomp.to_f.round(2)
+          puts "Health & Fitness......$#{'%.2f' % expenses_health}".yellow
+          print "Edit another? (y/n): "
+          edit_expenses = gets.chomp.downcase
+        when  "other"
+          print "Editing other:".blue
+          print " $"
+          expenses_other = gets.chomp.to_f.round(2)
+          puts "Other......$#{'%.2f' % expenses_other}".yellow
+          print "Edit another? (y/n): "
+          edit_expenses = gets.chomp.downcase
+        else
+          "Something went terribly wrong, unable to edit expenses at this time."
+      end
+    end
+
+      total_regular_expenses = (expenses_rent + expenses_insurance + expenses_utilities + expenses_transit + expenses_transportation + expenses_phone + expenses_internet + expenses_food + expenses_household + expenses_entertainment + expenses_education + expenses_health + expenses_other).round(2)
+
+      if edit_expenses == "n"
+        puts "\nCurrent Expenses"
+        puts "==========================="
+        puts "Rent......$#{'%.2f' % expenses_rent}"
+        puts "Insurance......$#{'%.2f' % expenses_insurance}"
+        puts "Utilities......$#{'%.2f' % expenses_utilities}"
+        puts "Public Transit......$#{'%.2f' % expenses_transit}"
+        puts "Personal Transportation......$#{'%.2f' % expenses_transportation}"
+        puts "Cell Phone......$#{'%.2f' % expenses_phone}"
+        puts "Internet & Cable & Home Phone......$#{'%.2f' % expenses_internet}"
+        puts "Food......$#{'%.2f' % expenses_food}"
+        puts "Household Supplies & Toiletries......$#{'%.2f' % expenses_household}"
+        puts "Entertainment......$#{'%.2f' % expenses_entertainment}"
+        puts "Education & Hobbies & Self-Improvement......$#{'%.2f' % expenses_education}"
+        puts "Fitness & Health......$#{'%.2f' % expenses_health}"
+        puts "Other......$#{'%.2f' % expenses_other}"
+        puts "TOTAL......$#{separate_comma('%.2f' % total_regular_expenses)}".red
+        puts "==========================="
+      end
     end
   end
 end
@@ -283,23 +333,14 @@ highest_interest = 0
 highest_interest_name = ""
 lowest_amount = 0
 lowest_amount_name = ""
-
-# maximum 9 separate loans/debts
-loan1 = Hash.new
-loan2 = Hash.new
-loan3 = Hash.new
-loan4 = Hash.new
-loan5 = Hash.new
-loan6 = Hash.new
-loan7 = Hash.new
-loan8 = Hash.new
-loan9 = Hash.new
+list_debt_names = []
 
 while payments == "y" || payments == "yes"
   num_payments = num_payments + 1
   puts "--- debt #{num_payments} ---"
   print "Name of payment: "
   name = gets.chomp
+  list_debt_names.push(name)
   print "Monthly payment amount: $"
   monthly_contribution = gets.chomp.to_f.round(2)
   total_monthly_contributions = total_monthly_contributions + monthly_contribution
@@ -338,15 +379,77 @@ end
 total_remains.to_f.round(2)
 avg_interest.to_f.round(2)
 total_monthly_contributions.to_f.round(2)
+expenses_debt = total_monthly_contributions.to_f.round(2)
+total_regular_expenses = total_regular_expenses + expenses_debt
 
-puts "\n-- debt stats --"
+puts "\nDEBT STATS"
+puts "==========================="
 puts "HIGHEST INTEREST DEBT: #{highest_interest_name} with #{'%.2f' % highest_interest}% interest".red
-puts "LOWEST DEBT AMOUNT: #{lowest_amount_name} with a total owing of $#{'%.2f' % lowest_amount}".red
+puts "LOWEST DEBT AMOUNT: #{lowest_amount_name} with a total owing of $#{separate_comma('%.2f' % lowest_amount)}".red
 puts "TOTAL NUMBER OF DEBTS: #{num_payments}".red
-puts "TOTAL AMOUNT OWING: $#{'%.2f' % total_remains}".red
+puts "TOTAL AMOUNT OWING: $#{separate_comma('%.2f' % total_remains)}".red
 puts "AVERAGE INTEREST ON DEBTS: #{'%.2f' % avg_interest}%".red
-puts "TOTAL MONTHLY PAYMENTS: $#{'%.2f' % total_monthly_contributions}".red
+puts "TOTAL MONTHLY PAYMENTS: $#{separate_comma('%.2f' % total_monthly_contributions)}".red
 puts "TOTAL MONTHS TO REPAYMENT FOR ALL DEBTS AT THIS RATE: #{total_months_to_repayment}".red
+
+puts "\nEXPENSES BREAKDOWN"
+puts "==========================="
+if known_expenses == "y" || known_expenses == "yes"
+  puts "TOTAL MONTHLY EXPENSES......$#{separate_comma('%.2f' % total_regular_expenses)}".red
+  puts "TOTAL REGULAR MONTHLY EXPENSES (EXCLUDING DEBT REPAYMENTS)......$#{separate_comma('%.2f' % (total_regular_expenses - expenses_debt))}".red
+  puts "TOTAL PERCENTAGE OF MONTHLY NET INCOME USED FOR EXPENSES......#{((total_regular_expenses / monthly_net_income) * 100).round(1)}%".green
+  puts "AMOUNT REMAINING FOR SAVINGS POTENTIAL......#{(100 - ((total_regular_expenses / monthly_net_income) * 100)).round(1)}%".green
+elsif known_expenses == "n" || known_expenses == "no"
+  puts "Please Note: Percentages are rounded independently and may have slight inaccuracies.\n".blue
+  puts "Rent......$#{'%.2f' % expenses_rent}"
+  puts "......#{((expenses_rent / total_regular_expenses) * 100).round(1)}% of total expenses".yellow
+  puts "......#{((expenses_rent / monthly_net_income) * 100).round(1)}% of monthly net income".yellow
+  puts "Insurance......$#{'%.2f' % expenses_insurance}"
+  puts "......#{((expenses_insurance / total_regular_expenses) * 100).round(1)}% of total expenses".yellow
+  puts "......#{((expenses_insurance / monthly_net_income) * 100).round(1)}% of monthly net income".yellow
+  puts "Utilities......$#{'%.2f' % expenses_utilities}"
+  puts "......#{((expenses_utilities / total_regular_expenses) * 100).round(1)}% of total expenses".yellow
+  puts "......#{((expenses_utilities / monthly_net_income) * 100).round(1)}% of monthly net income".yellow
+  puts "Public Transit......$#{'%.2f' % expenses_transit}"
+  puts "......#{((expenses_transit / total_regular_expenses) * 100).round(1)}% of total expenses".yellow
+  puts "......#{((expenses_transit / monthly_net_income) * 100).round(1)}% of monthly net income".yellow
+  puts "Personal Transportation......$#{'%.2f' % expenses_transportation}"
+  puts "......#{((expenses_transportation / total_regular_expenses) * 100).round(1)}% of total expenses".yellow
+  puts "......#{((expenses_transportation / monthly_net_income) * 100).round(1)}% of monthly net income".yellow
+  puts "Cell Phone......$#{'%.2f' % expenses_phone}"
+  puts "......#{((expenses_phone / total_regular_expenses) * 100).round(1)}% of total expenses".yellow
+  puts "......#{((expenses_phone / monthly_net_income) * 100).round(1)}% of monthly net income".yellow
+  puts "Internet & Cable & Home Phone......$#{'%.2f' % expenses_internet}"
+  puts "......#{((expenses_internet / total_regular_expenses) * 100).round(1)}% of total expenses".yellow
+  puts "......#{((expenses_internet / monthly_net_income) * 100).round(1)}% of monthly net income".yellow
+  puts "Food......$#{'%.2f' % expenses_food}"
+  puts "......#{((expenses_food / total_regular_expenses) * 100).round(1)}% of total expenses".yellow
+  puts "......#{((expenses_food / monthly_net_income) * 100).round(1)}% of monthly net income".yellow
+  puts "Household Supplies & Toiletries......$#{'%.2f' % expenses_household}"
+  puts "......#{((expenses_household / total_regular_expenses) * 100).round(1)}% of total expenses".yellow
+  puts "......#{((expenses_household / monthly_net_income) * 100).round(1)}% of monthly net income".yellow
+  puts "Entertainment......$#{'%.2f' % expenses_entertainment}"
+  puts "......#{((expenses_entertainment / total_regular_expenses) * 100).round(1)}% of total expenses".yellow
+  puts "......#{((expenses_entertainment / monthly_net_income) * 100).round(1)}% of monthly net income".yellow
+  puts "Education & Hobbies & Self-Improvement......$#{'%.2f' % expenses_education}"
+  puts "......#{((expenses_education / total_regular_expenses) * 100).round(1)}% of total expenses".yellow
+  puts "......#{((expenses_education / monthly_net_income) * 100).round(1)}% of monthly net income".yellow
+  puts "Fitness & Health......$#{'%.2f' % expenses_health}"
+  puts "......#{((expenses_health / total_regular_expenses) * 100).round(1)}% of total expenses".yellow
+  puts "......#{((expenses_health / monthly_net_income) * 100).round(1)}% of monthly net income".yellow
+  puts "Other......$#{'%.2f' % expenses_other}"
+  puts "......#{((expenses_other / total_regular_expenses) * 100).round(1)}% of total expenses".yellow
+  puts "......#{((expenses_other / monthly_net_income) * 100).round(1)}% of monthly net income".yellow
+  puts "Debt Payments......$#{'%.2f' % expenses_debt}"
+  puts "......#{list_debt_names.join(',')}".blue
+  puts "......#{((expenses_debt / total_regular_expenses) * 100).round(1)}% of total expenses".yellow
+  puts "......#{((expenses_debt / monthly_net_income) * 100).round(1)}% of monthly net income".yellow
+  puts "\nTOTAL MONTHLY EXPENSES......$#{separate_comma('%.2f' % total_regular_expenses)}".red
+  puts "TOTAL REGULAR MONTHLY EXPENSES (EXCLUDING DEBT REPAYMENTS)......$#{separate_comma('%.2f' % (total_regular_expenses - expenses_debt))}".red
+  puts "TOTAL PERCENTAGE OF MONTHLY NET INCOME USED FOR EXPENSES......#{((total_regular_expenses / monthly_net_income) * 100).round(1)}%".green
+  puts "AMOUNT REMAINING FOR SAVINGS POTENTIAL......#{(100 - ((total_regular_expenses / monthly_net_income) * 100)).round(1)}%".green
+end
+puts "==========================="
 
 puts "\n\n####### Step 2: Overview #######"
 puts "----- INCOME vs EXPENSES vs SAVINGS -----"
@@ -365,17 +468,15 @@ end
 if regular_savings == "y" || regular_savings == "yes"
   print "Total Regular Savings Contributions: $"
   monthly_savings = gets.chomp.to_f.round(2)
+else
+  monthly_savings = 0
 end
 
 total_remainder = monthly_difference - monthly_savings
-puts "\nMONTHLY NET INCOME: $#{'%.2f' % monthly_net_income}".green
-puts "REGULAR EXPENSES: $#{'%.2f' % total_regular_expenses}".red
-puts "MONTHLY DEBT PAYMENTS: $#{'%.2f' % total_monthly_contributions}".red
-puts "TOTAL MONTHLY EXPENSES: #{'%.2f' % total_expenses}".red
-puts "MONTHLY DIFFERENCE: $#{'%.2f' % monthly_difference}".blue
-puts "REGULAR MONTHLY SAVINGS: $#{'%.2f' % monthly_savings}".yellow
-puts "CURRENT SAVINGS: $#{'%.2f' % current_savings}".yellow
-puts "TOTAL MONTHLY INCOME REMAINDER: $#{'%.2f' % total_remainder}".blue
+puts "\nMONTHLY NET INCOME: $#{separate_comma('%.2f' % monthly_net_income)}".green
+puts "TOTAL MONTHLY EXPENSES: $#{separate_comma('%.2f' % total_regular_expenses)}".red
+puts "MAXIMUM MONTHLY SAVINGS POTENTIAL: $#{separate_comma('%.2f' % monthly_difference)}".blue
+puts "CURRENT SAVINGS: $#{separate_comma('%.2f' % current_savings)}".yellow
 
 puts "\n----- SAVINGS GOALS -----"
 if total_remainder < 0
@@ -387,69 +488,157 @@ max_savings = (total_remainder + monthly_savings).to_f.round(2)
 savings_goal = 0
 remaining_savings_goal = (savings_goal - current_savings).to_f.round(2)
 continue_option = ""
-until continue_option == "A" || continue_option == "B" || continue_option == "C" || continue_option == "D"
-  puts "A. Create a short term savings plan (3 months - 3 years)"
-  puts "B. Create a long term savings plan (3 years +)"
-  puts "C. Create a savings plan for a specific amount"
-  puts "D. Create a plan to aggressively pay off debt"
-  print "(A/B/C/D): "
+until continue_option == "A" || continue_option == "B"
+  #  || continue_option == "C" || continue_option == "D"
+  puts "A. Estimate savings over a specified timeline with current budget"
+  puts "B. Calculate debt repayment with maximized additional contributions"
+  # puts "C. Create a savings plan for a specific amount"
+  # puts "D. Create a plan to aggressively pay off debt"
+  print "(A/B): "
   continue_option = gets.chomp.upcase
 end
 
 if continue_option == "A"
-  puts "\n----- A. SHORT TERM SAVINGS PLAN -----"
-  st_savings_months = 0
-  st_savings_years = 0
-  include_current = ""
-  total_savings = 0
-  st_wmy = ""
-  until st_wmy == "M" || st_wmy == "Y"
-    puts "Calculate in months or years?"
-    print "(M/Y): "
-    st_wmy = gets.chomp.upcase
-  end
-  if st_wmy == "M"
-    until st_savings_months >= 0.5 && st_savings_months <= 36
-      print "Number of Months (minimum 0.5, maximum 36): "
-      st_savings_months = gets.chomp.to_i
-    end
-    puts "You plan to maximize short term savings over the course of #{st_savings_months} months.".green
-    total_savings = (max_savings * st_savings_months).to_f.round(2)
-    puts "Based on your current budget, you will likely save approximately $#{'%.2f' % total_savings}.".green
-  elsif st_wmy == "Y"
-    until st_savings_years <= 3 && st_savings_years != 0
-      print "Number of Years (maximum 3.0): "
-      st_savings_years = gets.chomp.to_f.round(2)
-    end
-    puts "You plan to maximize short term savings over the course of #{st_savings_years} years.".green
-    total_savings = ((max_savings * 12 )* st_savings_years).to_f.round(2)
-    puts "Based on your current budget, you will likely save approximately $#{'%.2f' % total_savings}.".green
-  end
-
-elsif continue_option == "B"
-puts "\n----- B. LONG TERM SAVINGS PLAN -----"
-lt_savings_years = 0
-  until lt_savings_years >= 3
-    print "Number of Years (minimum 3.0): "
-    lt_savings_years = gets.chomp.to_f.round(2)
-  end
-  puts "You plan to maximize long term savings over the course of #{lt_savings_years} years.".green
-  total_savings = ((max_savings * 12 )* lt_savings_years).to_f.round(2)
-  puts "Based on your current budget, you will likely save approximately $#{'%.2f' % total_savings}.".green
-
-elsif continue_option == "C"
-  puts "\n----- C. SAVINGS GOAL AMOUNT -----"
+  puts "\n----- A. ESTIMATE SAVINGS -----"
   savings_months = 0
   savings_years = 0
-  timeline_over_year = FALSE
-  until savings_goal > 0
-    print "Savings Goal Amount: $"
-    savings_goal = gets.to_f.round(2)
+  total_savings = 0
+  exclude_regular_savings = 0
+  months_or_years = ""
+  include_increase = ""
+  raise_percentage = 0
+  raise_when = 0
+  raise_multiple = ""
+  raise_frequency = 0
+  averaged_wage = 0
+  until months_or_years == "m" || months_or_years == "months" || months_or_years == "y" || months_or_years == "years"
+    puts "Calculate in months or years?"
+    print "(m/y): "
+    months_or_years = gets.chomp.downcase
   end
-  puts "You plan to save a total of #{'%.2f' % savings_goal}.".green
-  puts "Based on your current budget, you will likely save approximately $#{'%.2f' % total_savings}.".green
 
-  # new logic from here forward
-elsif continue_option == "D"
-  puts "\n----- D. PAY DEBT -----"
+  until include_increase == "y" || include_increase == "yes" || include_increase == "n" || include_increase == "no"
+    puts "Include estimated income changes?"
+    print "(y/n): "
+    include_increase = gets.chomp.downcase
+    if include_increase == "y" || include_increase == "yes"
+      until raise_percentage > 0
+        puts "By how what percentage do you expect your income to grow during the specified timeframe?"
+        print "Expected Growth (%): "
+        raise_percentage = gets.chomp.to_i
+        raise_percentage = raise_percentage * 0.01
+      end
+
+      until raise_multiple == "y" || raise_multiple == "yes" || raise_multiple == "n" || raise_multiple == "no"
+        puts "Do you expect this raise to occur more than once in the specified timeline?"
+        print "Multiple Raises (y/n): "
+        raise_multiple = gets.chomp.lowercase
+        if raise_multiple == "y" || raise_multiple == "yes"
+          until raise_frequency > 0
+            puts "How many times do you expect to earn a raise?  Please provide a number."
+            print "Raise frequency: "
+            raise_frequency = gets.to_i
+          end
+          until raise_when > 0
+            puts "As a rough percentage, at what point into the specified timeline do you expect each raise to occur?"
+            puts "For example, if you want to estimate savings over 5 years and expect a raise roughly every year, you would input 20%."
+            print "Average Point of Occurrence for Raises (%): "
+            raise_percentage = gets.chomp.to_i
+            raise_percentage = raise_percentage * 0.01
+
+            # averaged_wage = ((monthly_net_income + averaged raise over time) - total_expenses).to_f.round(2)
+
+
+
+
+
+
+
+
+
+          end
+        else
+          until raise_when > 0
+            puts "As a rough percentage, at what point into the specified timeline do you expect the raise to occur?"
+            puts "For example, if you want to estimate savings over 3 years and expect a raise in 2 years, you would input 65%."
+            print "Point of Occurrence for Raise (%): "
+            raise_percentage = gets.chomp.to_i
+            raise_percentage = raise_percentage * 0.01
+
+            # averaged_wage = ((monthly_net_income + averaged raise over time) - total_expenses).to_f.round(2)
+
+
+
+
+
+
+
+
+
+
+          end
+        end
+      end
+    end
+  end
+
+
+
+
+
+
+
+  if months_or_years == "m" || months_or_years == "months"
+    until savings_months > 0
+      print "Number of Months: "
+      savings_months = gets.chomp.to_f.round(2)
+    end
+
+
+    # if including raise estimates...
+
+
+
+
+
+
+
+
+
+
+
+    total_savings = (max_savings * savings_months).to_f.round(2)
+    exclude_regular_savings = ((max_savings - monthly_savings) * savings_months).to_f.round(2)
+    puts "\nTOTAL ESTIMATED SAVINGS OVER #{savings_months} MONTHS......$#{separate_comma('%.2f' % total_savings)}".green
+    puts "Excluding existing regular monthly savings......$#{separate_comma('%.2f' % exclude_regular_savings)}".yellow
+    puts "Total including existing saved funds......$#{separate_comma('%.2f' % (total_savings + current_savings))}.".yellow
+    puts "Total including saved funds AND excluding regular monthly savings......$#{separate_comma('%.2f' % (exclude_regular_savings + current_savings))}.".yellow
+  elsif months_or_years == "y" || months_or_years == "years"
+    until savings_years > 0
+      print "Number of Years: "
+      savings_years = gets.chomp.to_f.round(2)
+    end
+
+    # if including raise estimates...
+
+
+
+
+
+    total_savings = ((max_savings * 12 )* savings_years).to_f.round(2)
+    exclude_regular_savings = (((max_savings - monthly_savings) * 12 ) * savings_years).to_f.round(2)
+    puts "\nTOTAL ESTIMATED SAVINGS OVER #{savings_years} YEARS......$#{separate_comma('%.2f' % total_savings)}".green
+    puts "Excluding existing regular monthly savings......$#{separate_comma('%.2f' % exclude_regular_savings)}".yellow
+    puts "Total including existing saved funds......$#{separate_comma('%.2f' % (total_savings + current_savings))}.".yellow
+    puts "Total including saved funds AND excluding regular monthly savings......$#{separate_comma('%.2f' % (exclude_regular_savings + current_savings))}.".yellow
+  end
+
+
+
+
+
+elsif continue_option == "B"
+  puts "\n----- B. CALCULATE ACCELERATED DEBT REPAYMENT -----"
+  puts "Oops!  Option B doesn't exist yet!".red
+  puts "Sorry, chump."
 end
