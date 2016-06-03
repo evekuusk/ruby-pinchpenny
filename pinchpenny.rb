@@ -159,7 +159,7 @@ elsif known_expenses == "n" || known_expenses == "no"
   total_regular_expenses += expenses_health
   puts "= $#{separate_comma('%.2f' % total_regular_expenses)}".yellow
 
-  print "Other (do not include debt payments): $"
+  print "Leisure & Other (do not include debt payments): $"
   expenses_other = gets.chomp.to_f.round(2)
   total_regular_expenses += expenses_other
   puts "= $#{separate_comma('%.2f' % total_regular_expenses)}".yellow
@@ -185,10 +185,10 @@ elsif known_expenses == "n" || known_expenses == "no"
       puts "Entertainment......$#{'%.2f' % expenses_entertainment}"
       puts "Education & Hobbies & Self-Improvement......$#{'%.2f' % expenses_education}"
       puts "Fitness & Health......$#{'%.2f' % expenses_health}"
-      puts "Other......$#{'%.2f' % expenses_other}"
+      puts "Leisure & Other......$#{'%.2f' % expenses_other}"
       puts "==========================="
       edit_which = ""
-      until edit_which == "rent" || edit_which == "insurance" || edit_which == "utilities" || edit_which == "public transit" || edit_which == "transportation" || edit_which == "cell phone" || edit_which == "internet" || edit_which == "internet, cable, phone" || edit_which == "food" || edit_which == "household" || edit_which == "entertainment" || edit_which == "education" || edit_which == "hobbies" || edit_which == "health" || edit_which == "other"
+      until edit_which == "rent" || edit_which == "insurance" || edit_which == "utilities" || edit_which == "public transit" || edit_which == "transportation" || edit_which == "cell phone" || edit_which == "internet" || edit_which == "internet, cable, phone" || edit_which == "food" || edit_which == "household" || edit_which == "entertainment" || edit_which == "education" || edit_which == "hobbies" || edit_which == "health" || edit_which == "other" || edit_which == "leisure"
         print "\nWhich expense would you like to edit? (rent/insurance/utilities/public transit/transportation/cell phone/internet/cable/home phone/food/household/entertainment/education/hobbies/health/other): "
         edit_which = gets.chomp.downcase
         case edit_which
@@ -276,11 +276,11 @@ elsif known_expenses == "n" || known_expenses == "no"
           puts "Health & Fitness......$#{'%.2f' % expenses_health}".yellow
           print "Edit another? (y/n): "
           edit_expenses = gets.chomp.downcase
-        when  "other"
+        when  "other", "leisure"
           print "Editing other:".blue
           print " $"
           expenses_other = gets.chomp.to_f.round(2)
-          puts "Other......$#{'%.2f' % expenses_other}".yellow
+          puts "Leisure & Other......$#{'%.2f' % expenses_other}".yellow
           print "Edit another? (y/n): "
           edit_expenses = gets.chomp.downcase
         else
@@ -290,7 +290,7 @@ elsif known_expenses == "n" || known_expenses == "no"
 
       total_regular_expenses = (expenses_rent + expenses_insurance + expenses_utilities + expenses_transit + expenses_transportation + expenses_phone + expenses_internet + expenses_food + expenses_household + expenses_entertainment + expenses_education + expenses_health + expenses_other).round(2)
 
-      if edit_expenses == "n"
+      if edit_expenses == "n" || edit_expenses == "no"
         puts "\nCurrent Expenses"
         puts "==========================="
         puts "Rent......$#{'%.2f' % expenses_rent}"
@@ -305,7 +305,7 @@ elsif known_expenses == "n" || known_expenses == "no"
         puts "Entertainment......$#{'%.2f' % expenses_entertainment}"
         puts "Education & Hobbies & Self-Improvement......$#{'%.2f' % expenses_education}"
         puts "Fitness & Health......$#{'%.2f' % expenses_health}"
-        puts "Other......$#{'%.2f' % expenses_other}"
+        puts "Leisure & Other......$#{'%.2f' % expenses_other}"
         puts "TOTAL......$#{separate_comma('%.2f' % total_regular_expenses)}".red
         puts "==========================="
       end
@@ -489,11 +489,10 @@ savings_goal = 0
 remaining_savings_goal = (savings_goal - current_savings).to_f.round(2)
 continue_option = ""
 until continue_option == "A" || continue_option == "B"
-  #  || continue_option == "C" || continue_option == "D"
+  #  || continue_option == "C"
   puts "A. Estimate savings over a specified timeline with current budget"
-  puts "B. Calculate debt repayment with maximized additional contributions"
+  puts "B. Calculate debt repayment with maximized additional contributions ---> DEBUGGING / TEST MODE".blue
   # puts "C. Create a savings plan for a specific amount"
-  # puts "D. Create a plan to aggressively pay off debt"
   print "(A/B): "
   continue_option = gets.chomp.upcase
 end
@@ -507,106 +506,19 @@ if continue_option == "A"
   months_or_years = ""
   include_increase = ""
   raise_percentage = 0
-  raise_when = 0
-  raise_multiple = ""
   raise_frequency = 0
-  averaged_wage = 0
+  averaged_percentage = 0
+  averaged_net_wage = 0
   until months_or_years == "m" || months_or_years == "months" || months_or_years == "y" || months_or_years == "years"
     puts "Calculate in months or years?"
-    print "(m/y): "
+    print "(M/Y): "
     months_or_years = gets.chomp.downcase
   end
-
-  until include_increase == "y" || include_increase == "yes" || include_increase == "n" || include_increase == "no"
-    puts "Include estimated income changes?"
-    print "(y/n): "
-    include_increase = gets.chomp.downcase
-    if include_increase == "y" || include_increase == "yes"
-      until raise_percentage > 0
-        puts "By how what percentage do you expect your income to grow during the specified timeframe?"
-        print "Expected Growth (%): "
-        raise_percentage = gets.chomp.to_i
-        raise_percentage = raise_percentage * 0.01
-      end
-
-      until raise_multiple == "y" || raise_multiple == "yes" || raise_multiple == "n" || raise_multiple == "no"
-        puts "Do you expect this raise to occur more than once in the specified timeline?"
-        print "Multiple Raises (y/n): "
-        raise_multiple = gets.chomp.lowercase
-        if raise_multiple == "y" || raise_multiple == "yes"
-          until raise_frequency > 0
-            puts "How many times do you expect to earn a raise?  Please provide a number."
-            print "Raise frequency: "
-            raise_frequency = gets.to_i
-          end
-          until raise_when > 0
-            puts "As a rough percentage, at what point into the specified timeline do you expect each raise to occur?"
-            puts "For example, if you want to estimate savings over 5 years and expect a raise roughly every year, you would input 20%."
-            print "Average Point of Occurrence for Raises (%): "
-            raise_percentage = gets.chomp.to_i
-            raise_percentage = raise_percentage * 0.01
-
-            # averaged_wage = ((monthly_net_income + averaged raise over time) - total_expenses).to_f.round(2)
-
-
-
-
-
-
-
-
-
-          end
-        else
-          until raise_when > 0
-            puts "As a rough percentage, at what point into the specified timeline do you expect the raise to occur?"
-            puts "For example, if you want to estimate savings over 3 years and expect a raise in 2 years, you would input 65%."
-            print "Point of Occurrence for Raise (%): "
-            raise_percentage = gets.chomp.to_i
-            raise_percentage = raise_percentage * 0.01
-
-            # averaged_wage = ((monthly_net_income + averaged raise over time) - total_expenses).to_f.round(2)
-
-
-
-
-
-
-
-
-
-
-          end
-        end
-      end
-    end
-  end
-
-
-
-
-
-
-
   if months_or_years == "m" || months_or_years == "months"
     until savings_months > 0
       print "Number of Months: "
       savings_months = gets.chomp.to_f.round(2)
     end
-
-
-    # if including raise estimates...
-
-
-
-
-
-
-
-
-
-
-
     total_savings = (max_savings * savings_months).to_f.round(2)
     exclude_regular_savings = ((max_savings - monthly_savings) * savings_months).to_f.round(2)
     puts "\nTOTAL ESTIMATED SAVINGS OVER #{savings_months} MONTHS......$#{separate_comma('%.2f' % total_savings)}".green
@@ -618,13 +530,6 @@ if continue_option == "A"
       print "Number of Years: "
       savings_years = gets.chomp.to_f.round(2)
     end
-
-    # if including raise estimates...
-
-
-
-
-
     total_savings = ((max_savings * 12 )* savings_years).to_f.round(2)
     exclude_regular_savings = (((max_savings - monthly_savings) * 12 ) * savings_years).to_f.round(2)
     puts "\nTOTAL ESTIMATED SAVINGS OVER #{savings_years} YEARS......$#{separate_comma('%.2f' % total_savings)}".green
@@ -633,12 +538,7 @@ if continue_option == "A"
     puts "Total including saved funds AND excluding regular monthly savings......$#{separate_comma('%.2f' % (exclude_regular_savings + current_savings))}.".yellow
   end
 
-
-
-
-
 elsif continue_option == "B"
   puts "\n----- B. CALCULATE ACCELERATED DEBT REPAYMENT -----"
-  puts "Oops!  Option B doesn't exist yet!".red
-  puts "Sorry, chump."
+  puts "Oops!  Option B doesn't exist yet!  Sorry, chump.  Now get outta here.\n".red
 end
